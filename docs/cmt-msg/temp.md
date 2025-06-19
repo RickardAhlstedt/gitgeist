@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Pattern: `(?i)temp`
 
 ## Explanation

@@ -14,10 +14,10 @@ import (
 var generateExplanationsCmd = &cobra.Command{
 	Use:   "generate-docs",
 	Short: "Generate documentation for commit and file inspection patterns",
-	Long:  `Generates markdown files for each commit and file inspection pattern with explanations, organized under docs/commit and docs/file, plus an index.md.`,
+	Long:  `Generates markdown files for each commit and file inspection pattern with explanations, organized under docs/cmt-msg and docs/file, plus an index.md.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		baseDir := "docs"
-		commitDir := filepath.Join(baseDir, "commit")
+		commitDir := filepath.Join(baseDir, "cmt-msg")
 		fileDir := filepath.Join(baseDir, "file")
 
 		// Create directories if not exist
@@ -40,9 +40,15 @@ description: Documentation for commit and file inspection patterns used by Gitge
 
 		// Helper to sanitize pattern strings into safe filenames
 		sanitize := func(pattern string) string {
-			// remove regex special chars except alphanum and _
-			re := regexp.MustCompile(`[^a-zA-Z0-9]+`)
-			return re.ReplaceAllString(pattern, "_")
+			// Remove (?i) or similar regex prefixes
+			pattern = regexp.MustCompile(`(?i)\(\?[a-z]+\)`).ReplaceAllString(pattern, "")
+			// Extract alphanumeric words
+			re := regexp.MustCompile(`[a-zA-Z0-9]+`)
+			words := re.FindAllString(pattern, -1)
+			if len(words) == 0 {
+				return "pattern"
+			}
+			return strings.ToLower(words[len(words)-1])
 		}
 
 		// Maps of patterns & explanations from internal package
@@ -86,7 +92,7 @@ description: Documentation for commit and file inspection patterns used by Gitge
 		indexBuilder.WriteString("## Commit Message Patterns\n\n")
 		for pattern := range commitPatterns {
 			filename := sanitize(pattern) + ".md"
-			indexBuilder.WriteString(fmt.Sprintf("- [`%s`](commit/%s)\n", pattern, filename))
+			indexBuilder.WriteString(fmt.Sprintf("- [`%s`](cmt-msg/%s)\n", pattern, filename))
 		}
 		indexBuilder.WriteString("\n## File Inspection Patterns\n\n")
 		for pattern := range filePatterns {
