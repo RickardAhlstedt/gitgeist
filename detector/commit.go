@@ -33,7 +33,7 @@ func AnalyzeCommitMessage(message string, patterns []string) []string {
 		if re.MatchString(message) {
 			exp, ok := internal.CommitMessagePatternExplanations[pattern]
 			if ok {
-				warnings = append(warnings, fmt.Sprintf("Pattern '%s' found: %s", pattern, exp))
+				warnings = append(warnings, fmt.Sprintf("Pattern '%s' found: %s (%s)", pattern, exp, internal.DocLinkForPattern(re.String(), "commit")))
 			} else {
 				warnings = append(warnings, fmt.Sprintf("Pattern '%s' found", pattern))
 			}

@@ -47,7 +47,11 @@ func ScanRepoFiles(root string, patterns []string) ([]string, error) {
 		if err != nil {
 			return nil // ignore unreadable files
 		}
-		defer file.Close()
+		defer func() {
+			if err := file.Close(); err != nil {
+				return
+			}
+		}()
 
 		scanner := bufio.NewScanner(file)
 		lineNum := 0
@@ -58,7 +62,7 @@ func ScanRepoFiles(root string, patterns []string) ([]string, error) {
 				if re.MatchString(line) {
 					exp, ok := internal.FileInspectionPatternExplanations[re.String()]
 					if ok {
-						results = append(results, fmt.Sprintf("%s:%d: matches '%s' - %s", path, lineNum, re.String(), exp))
+						results = append(results, fmt.Sprintf("%s:%d: matches '%s' - %s (%s)", path, lineNum, re.String(), exp, internal.DocLinkForPattern(re.String(), "file")))
 					} else {
 						// If no explanation is found, just report the match
 						results = append(results, fmt.Sprintf("%s:%d: matches '%s'", path, lineNum, re.String()))

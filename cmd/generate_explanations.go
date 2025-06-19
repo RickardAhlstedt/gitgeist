@@ -40,15 +40,15 @@ description: Documentation for commit and file inspection patterns used by Gitge
 
 		// Helper to sanitize pattern strings into safe filenames
 		sanitize := func(pattern string) string {
-			// Remove (?i) or similar regex prefixes
-			pattern = regexp.MustCompile(`(?i)\(\?[a-z]+\)`).ReplaceAllString(pattern, "")
-			// Extract alphanumeric words
-			re := regexp.MustCompile(`[a-zA-Z0-9]+`)
-			words := re.FindAllString(pattern, -1)
-			if len(words) == 0 {
-				return "pattern"
-			}
-			return strings.ToLower(words[len(words)-1])
+			// Remove regex flags like (?i)
+			pattern = regexp.MustCompile(`\(\?[a-z]+\)`).ReplaceAllString(pattern, "")
+			// Replace all non [a-zA-Z0-9_] with underscore
+			pattern = regexp.MustCompile(`[^a-zA-Z0-9_]`).ReplaceAllString(pattern, "_")
+			// Convert to lowercase
+			pattern = strings.ToLower(pattern)
+			// Trim leading/trailing underscores
+			pattern = strings.Trim(pattern, "_")
+			return pattern
 		}
 
 		// Maps of patterns & explanations from internal package
